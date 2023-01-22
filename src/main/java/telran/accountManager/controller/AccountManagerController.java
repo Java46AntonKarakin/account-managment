@@ -1,4 +1,4 @@
-package accountManagment.controller;
+package telran.accountManager.controller;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,25 +6,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import accountManagment.dto.Account;
-import accountManagment.repository.AccountRepository;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import telran.accountManager.dto.Account;
+import telran.accountManager.repository.AccountRepository;
+
 import org.slf4j.*;
 
 @RestController
 @RequestMapping("accounts")
 @Validated
-public class AccountManagmentController {
+public class AccountManagerController {
 	PasswordEncoder encoder;
-	static Logger log = LoggerFactory.getLogger(AccountManagmentController.class);
+	static Logger log = LoggerFactory.getLogger(AccountManagerController.class);
 
 	@Autowired
 	AccountRepository<Account> repo;
 
-	public AccountManagmentController(PasswordEncoder encoder, UserDetailsManager manager) {
+	public AccountManagerController(PasswordEncoder encoder, UserDetailsManager manager) {
 		log.debug("AccountManagmentController constructor");
 		this.encoder = encoder;
 		log.debug("AccountManagmentController constructor created");

@@ -1,4 +1,4 @@
-package accountManagment.repository;
+package telran.accountManager.repository;
 
 public interface AccountRepository <Account>{
 	boolean addAccount(Account account);

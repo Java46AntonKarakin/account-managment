@@ -1,4 +1,4 @@
-package accountManagment.security;
+package telran.accountManager.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +14,13 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import accountManagment.controller.AccountManagmentController;
+import telran.accountManager.controller.AccountManagerController;
+
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-	static Logger log = LoggerFactory.getLogger(AccountManagmentController.class);
+	static Logger log = LoggerFactory.getLogger(AccountManagerController.class);
 	@Value("${app.username.admin:admin}")
 	String admin;
 	@Value("${app.password.admin:${ADMIN_PASSWORD}}")
@@ -28,14 +29,8 @@ public class SecurityConfiguration {
 	@Bean
 	SecurityFilterChain configure(HttpSecurity http) throws Exception {
 		log.debug("security configuration - enter");
-		http
-		.csrf()
-		.disable()
-		.authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.GET)
-				.hasAnyRole("USER", "ADMIN")
-				.anyRequest()
-				.hasRole("ADMIN"))
-		.httpBasic();
+		http.csrf().disable().authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.GET)
+				.hasAnyRole("USER", "ADMIN").anyRequest().hasRole("ADMIN")).httpBasic();
 		log.debug("http configuration completed");
 		return http.build();
 	}
@@ -47,15 +42,11 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	UserDetailsManager userDetailsService(PasswordEncoder bCryptPasswordEncoder) {
+	public UserDetailsManager userDetailsService(PasswordEncoder bCryptPasswordEncoder) {
 		log.debug("userDetailsService - enter");
 		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
 		manager.createUser(
-				User.withUsername(admin)
-				.password(bCryptPasswordEncoder.encode(adminPassword))
-				.roles("ADMIN")
-				.build()
-				);
+				User.withUsername(admin).password(bCryptPasswordEncoder.encode(adminPassword)).roles("ADMIN").build());
 		log.debug("manager.createUser - success");
 		return manager;
 	}

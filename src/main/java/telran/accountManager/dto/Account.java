@@ -1,4 +1,4 @@
-package accountManagment.dto;
+package telran.accountManager.dto;
 
 import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,7 @@ public class Account {
 	
 	public Account() {}
 	
-	@Email @NotEmpty
+	@NotEmpty @Email
 	public String username;
 	@NotEmpty @Length(min = 6)
 	public String password;

@@ -54,6 +54,11 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>karakin-group</groupId>
+			<artifactId>telran-classwork-artifact-01</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
