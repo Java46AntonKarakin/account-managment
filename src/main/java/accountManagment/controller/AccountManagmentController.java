@@ -2,45 +2,39 @@ package accountManagment.controller;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import accountManagment.dto.Account;
-import accountManagment.repository.ObjectRepository;
+import accountManagment.repository.AccountRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.validation.Valid;
-import lombok.extern.java.Log;
-
+import jakarta.validation.constraints.Email;
 import org.slf4j.*;
 
-@Log
 @RestController
 @RequestMapping("accounts")
-public class accountManagerController {
+@Validated
+public class AccountManagmentController {
 	PasswordEncoder encoder;
-	UserDetailsManager manager;
-	static Logger log = LoggerFactory.getLogger(accountManagerController.class);
+	static Logger log = LoggerFactory.getLogger(AccountManagmentController.class);
 
 	@Autowired
-	ObjectRepository<Account> repo;
+	AccountRepository<Account> repo;
 
-	public accountManagerController(PasswordEncoder encoder, UserDetailsManager manager) {
+	public AccountManagmentController(PasswordEncoder encoder, UserDetailsManager manager) {
+		log.debug("AccountManagmentController constructor");
 		this.encoder = encoder;
-		this.manager = manager;
+		log.debug("AccountManagmentController constructor created");
 	}
 
 	@PostMapping
 	String addUser(@RequestBody @Valid Account account) {
 		String res = String.format("User with name %s already exists", account.username);
-		if (!manager.userExists(account.username)) {
-			log.debug(String.format("addUser - user with name %s doen't exist", account.username));
-			UserDetails user = User.withUsername(account.username).password(encoder.encode(account.username))
-					.roles(account.role).build();
+		if (!repo.accountExist(account.username)) {
 			repo.addAccount(account);
-			manager.createUser(user);
 			res = String.format("user %s has been added ", account.username);
 		}
 		return res;
@@ -49,10 +43,7 @@ public class accountManagerController {
 	@PutMapping
 	String updateUser(@RequestBody @Valid Account account) {
 		String res = String.format("User with name %s doesn't exist", account.username);
-		if (manager.userExists(account.username)) {
-			UserDetails user = User.withUsername(account.username).password(encoder.encode(account.username))
-					.roles(account.role).build();
-			manager.updateUser(user);
+		if (repo.accountExist(account.username)) {
 			repo.updateAccount(account);
 			res = String.format("user %s has been updated", account.username);
 		}
@@ -60,10 +51,9 @@ public class accountManagerController {
 	}
 
 	@DeleteMapping("/{username}")
-	String deleteUser(@PathVariable("username") String username) {
+	String deleteUser(@PathVariable("username") @Email String username) {
 		String res = String.format("User with name %s doesn't exist", username);
-		if (manager.userExists(username)) {
-			manager.deleteUser(username);
+		if (repo.accountExist(username)) {
 			repo.deleteAccount(username);
 			res = String.format("user %s has been deleted", username);
 		}
@@ -71,8 +61,8 @@ public class accountManagerController {
 	}
 
 	@GetMapping("/{username}")
-	boolean userExists(@PathVariable("username") String username) {
-		return manager.userExists(username);
+	boolean userExists(@PathVariable("username") @Email String username) {
+		return repo.accountExist(username);
 	}
 
 	@PostConstruct

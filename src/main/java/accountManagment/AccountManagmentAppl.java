@@ -1,21 +1,23 @@
 package accountManagment;
 
 import java.util.Scanner;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import accountManagment.controller.accountManagerController;
+import accountManagment.controller.AccountManagmentController;
 import jakarta.annotation.PreDestroy;
 
-public class AccountingManagerAppl {
-	@Autowired
-	accountManagerController controller;
-
-	private static final String SHUTDOWN = "shutdown";
+@SpringBootApplication
+public class AccountManagmentAppl {
+	private static final String SHUTDOWN = "bb";
+	static Logger log = LoggerFactory.getLogger(AccountManagmentController.class);
 
 	public static void main(String[] args) {
-		ConfigurableApplicationContext ctx = SpringApplication.run(accountManagerController.class, args);
+		log.debug("main - launched");
+		ConfigurableApplicationContext ctx = SpringApplication.run(AccountManagmentController.class, args);
+		log.debug("ctx created");
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
 			System.out.println("To stop server type " + SHUTDOWN);
@@ -25,7 +27,6 @@ public class AccountingManagerAppl {
 			}
 		}
 		ctx.close();
-
 	}
 
 	@PreDestroy

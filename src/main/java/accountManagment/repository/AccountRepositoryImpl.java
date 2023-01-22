@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import accountManagment.dto.Account;
 
 @Repository
-public class RepositoryManager implements ObjectRepository<Account> {
+public class AccountRepositoryImpl implements AccountRepository<Account> {
+
+	PasswordEncoder encoder;
+	
+	public AccountRepositoryImpl(PasswordEncoder encoder) {
+		this.encoder = encoder;
+	}
 
 	File file;
 	@Value("${app.repository.path}")
@@ -29,22 +36,27 @@ public class RepositoryManager implements ObjectRepository<Account> {
 	ObjectMapper mapper;
 
 	@Override
-	public String addAccount(Account account) {
-		accountBase.put(account.username, account);
-		return null;
+	public boolean addAccount(Account account) {
+			accountBase.put(account.username, getSafeAccount(account)); // snfhbslag
+		return accountExist(account.username);
 	}
 
 	@Override
-	public String updateAccount(Account account) {
-		accountBase.remove(account.username);
-		accountBase.put(account.username, account);
-		return null;
+	public boolean updateAccount(Account account) {
+			accountBase.remove(account.username);
+			accountBase.put(account.username, getSafeAccount(account));
+		return !accountBase.get(account.username).equals(account);
 	}
 
 	@Override
-	public String deleteAccount(String username) {
-		accountBase.remove(username);
-		return null;
+	public boolean deleteAccount(String username) {
+			accountBase.remove(username);
+		return !accountBase.containsKey(username);
+	}
+		
+	@Override
+	public boolean accountExist(String username) {
+		return accountBase.containsKey(username);
 	}
 
 	public void saveBase() {
@@ -76,13 +88,12 @@ public class RepositoryManager implements ObjectRepository<Account> {
 						.build();
 				manager.createUser(user);
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
+	
+	Account getSafeAccount (Account unsafeAccount) {
+		return new Account (unsafeAccount.username, unsafeAccount.role, encoder.encode(unsafeAccount.password));
+	} 
 }

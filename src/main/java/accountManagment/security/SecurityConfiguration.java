@@ -1,5 +1,7 @@
 package accountManagment.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
@@ -12,21 +14,20 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import accountManagment.controller.AccountManagmentController;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-
-	@Value("${app.username.user:user}")
-	String user;
+	static Logger log = LoggerFactory.getLogger(AccountManagmentController.class);
 	@Value("${app.username.admin:admin}")
 	String admin;
-	@Value("${app.password.user:${USER_PASSWORD}}")
-	String userPassword;
 	@Value("${app.password.admin:${ADMIN_PASSWORD}}")
 	String adminPassword;
 
 	@Bean
 	SecurityFilterChain configure(HttpSecurity http) throws Exception {
+		log.debug("security configuration - enter");
 		http
 		.csrf()
 		.disable()
@@ -35,29 +36,27 @@ public class SecurityConfiguration {
 				.anyRequest()
 				.hasRole("ADMIN"))
 		.httpBasic();
+		log.debug("http configuration completed");
 		return http.build();
 	}
 
 	@Bean
 	PasswordEncoder getPasswordEncoder() {
+		log.debug("BCryptPasswordEncoder - enter");
 		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
 	UserDetailsManager userDetailsService(PasswordEncoder bCryptPasswordEncoder) {
+		log.debug("userDetailsService - enter");
 		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-		manager.createUser(
-				User.withUsername(user)
-				.password(bCryptPasswordEncoder.encode(userPassword))
-				.roles("USER")
-				.build()
-				);
 		manager.createUser(
 				User.withUsername(admin)
 				.password(bCryptPasswordEncoder.encode(adminPassword))
 				.roles("ADMIN")
 				.build()
 				);
+		log.debug("manager.createUser - success");
 		return manager;
 	}
 }
